@@ -1,0 +1,10 @@
+---
+# Copy this file to all.yml and customize it for your environment.
+
+nginx_server_name: "_"
+nginx_listen_port: 80
+
+app_name: "ansible-semaphore-lab"
+app_environment: "production-lab"
+
+app_message: "Hello from Ansible + Semaphore!"

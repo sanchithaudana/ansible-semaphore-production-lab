@@ -1,0 +1,8 @@
+---
+- name: Configure production lab web servers
+  hosts: webservers
+  become: true
+  gather_facts: true
+
+  roles:
+    - nginx

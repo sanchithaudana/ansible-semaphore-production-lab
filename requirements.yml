@@ -1,0 +1,4 @@
+---
+# Add Ansible Galaxy collections here as the project grows.
+collections: []
+roles: []

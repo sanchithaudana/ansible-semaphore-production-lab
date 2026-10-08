@@ -1,0 +1,26 @@
+---
+- name: Verify web server
+  hosts: webservers
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Check Nginx service
+      ansible.builtin.service_facts:
+
+    - name: Assert Nginx is running
+      ansible.builtin.assert:
+        that:
+          - "'nginx.service' in ansible_facts.services"
+          - "ansible_facts.services['nginx.service'].state == 'running'"
+        fail_msg: "Nginx is not running."
+
+    - name: Check HTTP endpoint locally
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ nginx_listen_port | default(80) }}"
+        status_code: 200
+      register: nginx_http_check
+
+    - name: Show HTTP status
+      ansible.builtin.debug:
+        msg: "Nginx HTTP status: {{ nginx_http_check.status }}"

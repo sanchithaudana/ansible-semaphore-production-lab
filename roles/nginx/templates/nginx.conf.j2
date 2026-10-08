@@ -1,0 +1,22 @@
+server {
+    listen {{ nginx_listen_port }};
+    listen [::]:{{ nginx_listen_port }};
+
+    server_name {{ nginx_server_name }};
+
+    root /var/www/html;
+    index index.html;
+
+    access_log /var/log/nginx/ansible-lab-access.log;
+    error_log /var/log/nginx/ansible-lab-error.log;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    location /health {
+        access_log off;
+        default_type text/plain;
+        return 200 "OK\n";
+    }
+}
