@@ -13,7 +13,6 @@
     owner: root
     group: root
     mode: "0644"
-    validate: "/usr/sbin/nginx -t -c %s"
   notify: Reload nginx
 
 - name: Enable Ansible lab virtual host
