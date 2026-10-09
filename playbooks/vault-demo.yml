@@ -4,10 +4,14 @@
   become: true
   gather_facts: true
 
+  vars_files:
+  - ../group_vars/all/vault.yml
+
   tasks:
   - name: Verify encrypted variables were decrypted
     ansible.builtin.assert:
       that:
+      - vault_demo is defined
       - vault_demo.database_password is defined
       - vault_demo.api_token is defined
       - vault_demo.database_password | length > 0
