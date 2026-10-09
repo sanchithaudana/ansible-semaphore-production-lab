@@ -1,15 +1,445 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ app_name }}</title>
+
+    <title>{{ app_name }} | Infrastructure Dashboard</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #080d18;
+            --panel: #111827;
+            --border: rgba(148, 163, 184, 0.15);
+            --text: #f1f5f9;
+            --muted: #94a3b8;
+            --primary: #818cf8;
+            --green: #34d399;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(ellipse at 15% 0%, rgba(99, 102, 241, .15), transparent 40%),
+                radial-gradient(ellipse at 100% 100%, rgba(16, 185, 129, .08), transparent 35%),
+                var(--bg);
+        }
+
+        .navbar {
+            height: 76px;
+            padding: 0 7%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+            background: rgba(8, 13, 24, .8);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 17px;
+            font-weight: 800;
+            letter-spacing: -.5px;
+        }
+
+        .brand-icon {
+            display: grid;
+            place-items: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            color: white;
+            font-size: 21px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            box-shadow: 0 5px 25px rgba(99, 102, 241, .25);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            display: inline-block;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 12px rgba(52, 211, 153, .7);
+        }
+
+        .container {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 64px 24px 36px;
+        }
+
+        .eyebrow {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #a5b4fc;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: clamp(34px, 6vw, 58px);
+            line-height: 1.12;
+            letter-spacing: -2.5px;
+            max-width: 850px;
+            overflow-wrap: anywhere;
+        }
+
+        .gradient {
+            background: linear-gradient(90deg, #a5b4fc, #c4b5fd, #67e8f9);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .subtitle {
+            margin-top: 20px;
+            max-width: 650px;
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.9;
+        }
+
+        .status-banner {
+            margin-top: 36px;
+            padding: 16px 20px;
+            border: 1px solid rgba(52, 211, 153, .2);
+            border-radius: 14px;
+            background: rgba(16, 185, 129, .06);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .check-icon {
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+            width: 38px;
+            height: 38px;
+            color: var(--green);
+            background: rgba(52, 211, 153, .12);
+            border-radius: 11px;
+            font-size: 19px;
+        }
+
+        .status-title {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .status-description {
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .section-heading {
+            margin: 44px 0 18px;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .card {
+            min-width: 0;
+            padding: 25px;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            background: linear-gradient(145deg, rgba(22, 32, 50, .95), rgba(15, 23, 42, .9));
+            transition: transform .25s ease, border-color .25s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(129, 140, 248, .5);
+        }
+
+        .card-icon {
+            display: grid;
+            place-items: center;
+            width: 44px;
+            height: 44px;
+            margin-bottom: 22px;
+            border-radius: 13px;
+            font-size: 21px;
+            background: rgba(129, 140, 248, .12);
+        }
+
+        .card-label {
+            color: var(--muted);
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        .card-value {
+            font-size: 21px;
+            font-weight: 700;
+            letter-spacing: -.5px;
+            overflow-wrap: anywhere;
+        }
+
+        .card-footer {
+            margin-top: 17px;
+            padding-top: 14px;
+            border-top: 1px solid var(--border);
+            color: #a5b4fc;
+            font-size: 11px;
+        }
+
+        .pipeline {
+            margin-top: 24px;
+            padding: 26px;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            background: rgba(17, 24, 39, .75);
+        }
+
+        .pipeline h2 {
+            font-size: 15px;
+            margin-bottom: 24px;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px;
+            border-radius: 12px;
+            background: rgba(148, 163, 184, .05);
+            border: 1px solid var(--border);
+        }
+
+        .step-number {
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+            width: 30px;
+            height: 30px;
+            border-radius: 9px;
+            background: rgba(129, 140, 248, .15);
+            color: #c7d2fe;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .step-name {
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .step-detail {
+            margin-top: 5px;
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        footer {
+            margin-top: 60px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+            color: #64748b;
+            font-size: 11px;
+            line-height: 1.8;
+        }
+
+        footer strong {
+            color: #94a3b8;
+        }
+
+        @media (max-width: 700px) {
+            .navbar {
+                padding: 0 20px;
+                height: 68px;
+            }
+
+            .container {
+                padding: 44px 18px 25px;
+            }
+
+            h1 {
+                letter-spacing: -1.5px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .steps {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                padding: 22px;
+            }
+
+            .nav-right {
+                font-size: 10px;
+            }
+
+            footer {
+                margin-top: 40px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                transition: none !important;
+            }
+        }
+    </style>
 </head>
+
 <body>
-    <h1>{{ app_message }}</h1>
-    <p>Application: {{ app_name }}</p>
-    <p>Environment: {{ app_environment }}</p>
-    <p>Managed by Ansible through Semaphore.</p>
-    <h1>TESTING</h1> 
+    <header class="navbar">
+        <div class="brand">
+            <div class="brand-icon">⌘</div>
+            <span>Infra<span class="gradient">Flow</span></span>
+        </div>
+
+        <div class="nav-right">
+            <span class="status-dot"></span>
+            <span>INFRASTRUCTURE PORTAL</span>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="eyebrow">
+            <span class="status-dot"></span>
+            AUTOMATED DEPLOYMENT
+        </div>
+
+        <h1>
+            Welcome to <span class="gradient">{{ app_name }}</span>
+        </h1>
+
+        <p class="subtitle">
+            {{ app_message }}
+            Your application is managed through an automated
+            infrastructure workflow using Ansible and Semaphore.
+        </p>
+
+        <div class="status-banner">
+            <div class="check-icon">✓</div>
+            <div>
+                <div class="status-title">Deployment page loaded</div>
+                <div class="status-description">
+                    This page is being served by your configured web server.
+                    The green indicator does not represent an independent health check.
+                </div>
+            </div>
+        </div>
+
+        <h2 class="section-heading">Application Overview</h2>
+
+        <section class="grid">
+            <article class="card">
+                <div class="card-icon">◈</div>
+                <div class="card-label">Application Name</div>
+                <div class="card-value">{{ app_name }}</div>
+                <div class="card-footer">APPLICATION IDENTIFICATION</div>
+            </article>
+
+            <article class="card">
+                <div class="card-icon">⌘</div>
+                <div class="card-label">Deployment Environment</div>
+                <div class="card-value">{{ app_environment }}</div>
+                <div class="card-footer">ENVIRONMENT CONFIGURATION</div>
+            </article>
+
+            <article class="card">
+                <div class="card-icon">⚙</div>
+                <div class="card-label">Configuration Management</div>
+                <div class="card-value">Ansible</div>
+                <div class="card-footer">ORCHESTRATED BY SEMAPHORE</div>
+            </article>
+        </section>
+
+        <section class="pipeline">
+            <h2>Deployment Workflow</h2>
+
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">01</div>
+                    <div>
+                        <div class="step-name">Source Configuration</div>
+                        <div class="step-detail">Ansible repository</div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">02</div>
+                    <div>
+                        <div class="step-name">Automation</div>
+                        <div class="step-detail">Semaphore task execution</div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">03</div>
+                    <div>
+                        <div class="step-name">Web Application</div>
+                        <div class="step-detail">Managed server deployment</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <div>
+                <strong>{{ app_name }}</strong><br>
+                Automated Infrastructure Management
+            </div>
+
+            <div>
+                Managed by Ansible through Semaphore<br>
+                © 2026 · Internal Application Portal
+            </div>
+        </footer>
+    </main>
 </body>
 </html>
+```
