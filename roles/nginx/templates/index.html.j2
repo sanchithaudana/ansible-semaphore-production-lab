@@ -4,21 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>{{ app_name }} | Infrastructure Dashboard</title>
+    <title>{{ app_name }} | DevOps Deployment Platform</title>
+    <meta name="description" content="AWS EC2 infrastructure configured using Ansible, Semaphore and Nginx.">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --bg: #080d18;
-            --panel: #111827;
-            --border: rgba(148, 163, 184, 0.15);
-            --text: #f1f5f9;
-            --muted: #94a3b8;
-            --primary: #818cf8;
-            --green: #34d399;
+            --bg: #080b12;
+            --surface: #101621;
+            --surface-2: #141d2b;
+            --border: #222c3b;
+            --text: #edf2fa;
+            --muted: #8996aa;
+            --blue: #8ba5ff;
+            --green: #42d6a4;
+            --purple: #b7a0ff;
+            --mono: 'JetBrains Mono', monospace;
         }
 
         * {
@@ -27,304 +31,533 @@
             box-sizing: border-box;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
-            min-height: 100vh;
-            font-family: 'Inter', sans-serif;
-            color: var(--text);
             background:
-                radial-gradient(ellipse at 15% 0%, rgba(99, 102, 241, .15), transparent 40%),
-                radial-gradient(ellipse at 100% 100%, rgba(16, 185, 129, .08), transparent 35%),
+                radial-gradient(ellipse at 50% -20%, rgba(75, 101, 210, .17), transparent 55%),
                 var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .container {
+            width: min(1160px, calc(100% - 40px));
+            margin: auto;
         }
 
         .navbar {
             height: 76px;
-            padding: 0 7%;
+            border-bottom: 1px solid var(--border);
+            background: rgba(8, 11, 18, .88);
             display: flex;
             align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            backdrop-filter: blur(16px);
+        }
+
+        .nav-content {
+            display: flex;
             justify-content: space-between;
-            border-bottom: 1px solid var(--border);
-            background: rgba(8, 13, 24, .8);
+            align-items: center;
+            gap: 20px;
         }
 
         .brand {
             display: flex;
             align-items: center;
             gap: 12px;
-            font-size: 17px;
             font-weight: 800;
+            font-size: 16px;
             letter-spacing: -.5px;
         }
 
         .brand-icon {
-            display: grid;
-            place-items: center;
             width: 40px;
             height: 40px;
             border-radius: 12px;
+            display: grid;
+            place-items: center;
             color: white;
-            font-size: 21px;
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
-            box-shadow: 0 5px 25px rgba(99, 102, 241, .25);
+            font-size: 20px;
+            background: linear-gradient(135deg, #587cf4, #8a64ef);
+            box-shadow: 0 0 28px rgba(99, 102, 241, .2);
         }
 
-        .nav-right {
+        .brand span:last-child {
+            color: var(--blue);
+        }
+
+        .nav-status {
             display: flex;
             align-items: center;
-            gap: 10px;
-            color: var(--muted);
-            font-size: 12px;
+            gap: 9px;
+            padding: 8px 13px;
+            border: 1px solid rgba(66, 214, 164, .22);
+            border-radius: 999px;
+            background: rgba(66, 214, 164, .06);
+            color: #85e8c5;
+            font-size: 11px;
+            font-weight: 600;
         }
 
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            display: inline-block;
+        .dot {
+            width: 7px;
+            height: 7px;
             border-radius: 50%;
             background: var(--green);
-            box-shadow: 0 0 12px rgba(52, 211, 153, .7);
+            box-shadow: 0 0 10px rgba(66, 214, 164, .6);
+            flex-shrink: 0;
         }
 
-        .container {
-            max-width: 1120px;
-            margin: 0 auto;
-            padding: 64px 24px 36px;
+        .hero {
+            padding: 90px 0 50px;
+            text-align: center;
         }
 
         .eyebrow {
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            gap: 10px;
-            color: #a5b4fc;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+            gap: 9px;
+            padding: 8px 13px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            color: #b6c3d8;
+            background: rgba(255, 255, 255, .025);
             font-size: 11px;
-            font-weight: 700;
-            margin-bottom: 20px;
+            font-weight: 600;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+        }
+
+        .eyebrow .dot {
+            width: 6px;
+            height: 6px;
         }
 
         h1 {
-            font-size: clamp(34px, 6vw, 58px);
-            line-height: 1.12;
-            letter-spacing: -2.5px;
-            max-width: 850px;
+            max-width: 900px;
+            margin: 27px auto 20px;
+            font-size: clamp(38px, 6.5vw, 70px);
+            line-height: 1.08;
+            letter-spacing: -3.5px;
+            font-weight: 800;
             overflow-wrap: anywhere;
         }
 
         .gradient {
-            background: linear-gradient(90deg, #a5b4fc, #c4b5fd, #67e8f9);
+            background: linear-gradient(100deg, #91a9ff, #c3a6ff 55%, #72e5d1);
+            color: transparent;
             -webkit-background-clip: text;
             background-clip: text;
-            color: transparent;
         }
 
-        .subtitle {
-            margin-top: 20px;
-            max-width: 650px;
+        .hero-description {
+            max-width: 680px;
+            margin: auto;
             color: var(--muted);
             font-size: 15px;
             line-height: 1.9;
         }
 
-        .status-banner {
-            margin-top: 36px;
-            padding: 16px 20px;
-            border: 1px solid rgba(52, 211, 153, .2);
-            border-radius: 14px;
-            background: rgba(16, 185, 129, .06);
+        .hero-tags {
             display: flex;
-            align-items: center;
-            gap: 14px;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 9px;
+            margin-top: 28px;
         }
 
-        .check-icon {
-            display: grid;
-            place-items: center;
-            flex-shrink: 0;
-            width: 38px;
-            height: 38px;
-            color: var(--green);
-            background: rgba(52, 211, 153, .12);
-            border-radius: 11px;
-            font-size: 19px;
+        .tag {
+            padding: 7px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, .025);
+            font-family: var(--mono);
+            font-size: 11px;
+            color: #c0ccdf;
         }
 
-        .status-title {
-            font-size: 13px;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .status-description {
-            color: var(--muted);
-            font-size: 12px;
-            line-height: 1.6;
+        .section {
+            padding: 30px 0;
         }
 
         .section-heading {
-            margin: 44px 0 18px;
-            font-size: 16px;
-            font-weight: 700;
+            margin-bottom: 22px;
+        }
+
+        .section-heading h2 {
+            font-size: 19px;
+            letter-spacing: -.5px;
+        }
+
+        .section-heading p {
+            margin-top: 5px;
+            font-size: 12px;
+            color: var(--muted);
         }
 
         .grid {
             display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 18px;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 15px;
         }
 
         .card {
             min-width: 0;
-            padding: 25px;
+            padding: 23px;
+            border-radius: 15px;
             border: 1px solid var(--border);
-            border-radius: 18px;
-            background: linear-gradient(145deg, rgba(22, 32, 50, .95), rgba(15, 23, 42, .9));
-            transition: transform .25s ease, border-color .25s ease;
+            background: linear-gradient(145deg, #131c2a, #0e141e);
+            transition: border-color .2s, transform .2s;
         }
 
         .card:hover {
-            transform: translateY(-4px);
-            border-color: rgba(129, 140, 248, .5);
+            transform: translateY(-3px);
+            border-color: #455579;
         }
 
         .card-icon {
+            width: 42px;
+            height: 42px;
             display: grid;
             place-items: center;
-            width: 44px;
-            height: 44px;
-            margin-bottom: 22px;
-            border-radius: 13px;
+            border-radius: 12px;
             font-size: 21px;
-            background: rgba(129, 140, 248, .12);
+            margin-bottom: 19px;
+            background: rgba(130, 153, 255, .12);
         }
 
         .card-label {
+            font-size: 11px;
             color: var(--muted);
-            font-size: 12px;
-            margin-bottom: 10px;
+            margin-bottom: 7px;
         }
 
         .card-value {
-            font-size: 21px;
+            font-size: 17px;
             font-weight: 700;
-            letter-spacing: -.5px;
             overflow-wrap: anywhere;
         }
 
-        .card-footer {
-            margin-top: 17px;
-            padding-top: 14px;
-            border-top: 1px solid var(--border);
-            color: #a5b4fc;
+        .card-detail {
             font-size: 11px;
+            color: #75839a;
+            margin-top: 9px;
         }
 
-        .pipeline {
-            margin-top: 24px;
-            padding: 26px;
+        .panel {
             border: 1px solid var(--border);
-            border-radius: 18px;
-            background: rgba(17, 24, 39, .75);
+            border-radius: 17px;
+            background: rgba(16, 22, 33, .88);
+            overflow: hidden;
         }
 
-        .pipeline h2 {
-            font-size: 15px;
-            margin-bottom: 24px;
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 21px 24px;
+            border-bottom: 1px solid var(--border);
         }
 
-        .steps {
+        .panel-header h3 {
+            font-size: 14px;
+        }
+
+        .panel-header p {
+            color: var(--muted);
+            font-size: 11px;
+            margin-top: 4px;
+        }
+
+        .panel-badge {
+            border: 1px solid rgba(66, 214, 164, .2);
+            border-radius: 7px;
+            padding: 5px 9px;
+            color: #7be3bc;
+            background: rgba(66, 214, 164, .06);
+            font-size: 10px;
+            white-space: nowrap;
+        }
+
+        .architecture {
+            display: grid;
+            grid-template-columns: 1fr 44px 1fr 44px 1fr;
+            align-items: center;
+            gap: 8px;
+            padding: 27px 24px;
+        }
+
+        .node {
+            padding: 22px 12px;
+            text-align: center;
+            border: 1px solid #2a3548;
+            border-radius: 12px;
+            background: #131c29;
+            min-width: 0;
+        }
+
+        .node-icon {
+            font-size: 25px;
+            margin-bottom: 10px;
+        }
+
+        .node-title {
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .node-subtitle {
+            margin-top: 5px;
+            color: var(--muted);
+            font-size: 10px;
+            overflow-wrap: anywhere;
+        }
+
+        .arrow {
+            text-align: center;
+            color: #7e94d9;
+            font-size: 23px;
+        }
+
+        .node.semaphore {
+            border-color: rgba(183, 160, 255, .4);
+        }
+
+        .node.ansible {
+            border-color: rgba(139, 165, 255, .4);
+        }
+
+        .node.nginx {
+            border-color: rgba(66, 214, 164, .35);
+        }
+
+        .code-window {
+            background: #0a0f17;
+            border-top: 1px solid var(--border);
+        }
+
+        .code-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 13px 18px;
+            border-bottom: 1px solid #202938;
+            color: #8390a5;
+            font-family: var(--mono);
+            font-size: 10px;
+        }
+
+        .code-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .code-dots span {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #3d4960;
+        }
+
+        pre {
+            padding: 22px;
+            overflow-x: auto;
+            font-family: var(--mono);
+            font-size: 12px;
+            line-height: 2;
+            color: #bdc9dc;
+        }
+
+        .comment {
+            color: #75869d;
+        }
+
+        .keyword {
+            color: #b6a1ff;
+        }
+
+        .value {
+            color: #79dfba;
+        }
+
+        .workflow {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 14px;
         }
 
-        .step {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 14px;
-            border-radius: 12px;
-            background: rgba(148, 163, 184, .05);
+        .workflow-step {
+            position: relative;
+            padding: 23px;
             border: 1px solid var(--border);
+            border-radius: 13px;
+            background: var(--surface);
         }
 
         .step-number {
             display: grid;
             place-items: center;
-            flex-shrink: 0;
-            width: 30px;
-            height: 30px;
-            border-radius: 9px;
-            background: rgba(129, 140, 248, .15);
-            color: #c7d2fe;
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            background: rgba(139, 165, 255, .12);
+            color: var(--blue);
+            font-family: var(--mono);
             font-size: 12px;
-            font-weight: 700;
         }
 
-        .step-name {
-            font-size: 12px;
-            font-weight: 600;
+        .workflow-step h3 {
+            font-size: 13px;
+            margin-bottom: 7px;
         }
 
-        .step-detail {
-            margin-top: 5px;
-            color: var(--muted);
-            font-size: 10px;
-        }
-
-        footer {
-            margin-top: 60px;
-            padding-top: 24px;
-            border-top: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            gap: 16px;
-            flex-wrap: wrap;
-            color: #64748b;
+        .workflow-step p {
             font-size: 11px;
+            color: var(--muted);
             line-height: 1.8;
         }
 
-        footer strong {
-            color: #94a3b8;
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
-        @media (max-width: 700px) {
-            .navbar {
-                padding: 0 20px;
-                height: 68px;
+        .tech {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 12px 15px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--surface);
+            font-size: 12px;
+            color: #c7d2e2;
+        }
+
+        .tech span {
+            color: var(--green);
+        }
+
+        .footer {
+            margin-top: 55px;
+            padding: 27px 0;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+            color: #758198;
+            font-size: 11px;
+        }
+
+        .footer strong {
+            color: #b7c4d7;
+        }
+
+        @media (max-width: 850px) {
+            .grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
             }
 
-            .container {
-                padding: 44px 18px 25px;
+            .architecture {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .arrow {
+                transform: rotate(90deg);
+                font-size: 19px;
+            }
+
+            .workflow {
+                grid-template-columns: 1fr;
+            }
+
+            .hero {
+                padding-top: 65px;
             }
 
             h1 {
-                letter-spacing: -1.5px;
+                letter-spacing: -2px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                width: calc(100% - 28px);
+            }
+
+            .navbar {
+                height: 67px;
+            }
+
+            .brand {
+                font-size: 14px;
+            }
+
+            .brand-icon {
+                width: 35px;
+                height: 35px;
+            }
+
+            .nav-status {
+                padding: 7px 9px;
+                font-size: 9px;
+            }
+
+            .hero {
+                padding: 48px 0 32px;
+            }
+
+            h1 {
+                font-size: 39px;
+                letter-spacing: -1.8px;
+            }
+
+            .hero-description {
+                font-size: 13px;
             }
 
             .grid {
                 grid-template-columns: 1fr;
             }
 
-            .steps {
-                grid-template-columns: 1fr;
+            .panel-header {
+                padding: 17px;
             }
 
-            .card {
-                padding: 22px;
+            .architecture {
+                padding: 18px;
             }
 
-            .nav-right {
+            pre {
+                padding: 16px;
                 font-size: 10px;
-            }
-
-            footer {
-                margin-top: 40px;
             }
         }
 
         @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto;
+            }
+
             *, *::before, *::after {
                 transition: none !important;
             }
@@ -333,111 +566,258 @@
 </head>
 
 <body>
-    <header class="navbar">
-        <div class="brand">
-            <div class="brand-icon">⌘</div>
-            <span>Infra<span class="gradient">Flow</span></span>
-        </div>
 
-        <div class="nav-right">
-            <span class="status-dot"></span>
-            <span>INFRASTRUCTURE PORTAL</span>
+    <!-- Navigation -->
+    <header class="navbar">
+        <div class="container nav-content">
+            <a class="brand" href="#home" aria-label="Infrastructure home">
+                <div class="brand-icon">⌘</div>
+                <div>Cloud<span>Ops</span></div>
+            </a>
+
+            <div class="nav-status">
+                <span class="dot"></span>
+                EC2 WEB SERVER
+            </div>
         </div>
     </header>
 
-    <main class="container">
-        <div class="eyebrow">
-            <span class="status-dot"></span>
-            AUTOMATED DEPLOYMENT
-        </div>
+    <main id="home">
 
-        <h1>
-            Welcome to <span class="gradient">{{ app_name }}</span>
-        </h1>
-
-        <p class="subtitle">
-            {{ app_message }}
-            Your application is managed through an automated
-            infrastructure workflow using Ansible and Semaphore.
-        </p>
-
-        <div class="status-banner">
-            <div class="check-icon">✓</div>
-            <div>
-                <div class="status-title">Deployment page loaded</div>
-                <div class="status-description">
-                    This page is being served by your configured web server.
-                    The green indicator does not represent an independent health check.
-                </div>
-            </div>
-        </div>
-
-        <h2 class="section-heading">Application Overview</h2>
-
-        <section class="grid">
-            <article class="card">
-                <div class="card-icon">◈</div>
-                <div class="card-label">Application Name</div>
-                <div class="card-value">{{ app_name }}</div>
-                <div class="card-footer">APPLICATION IDENTIFICATION</div>
-            </article>
-
-            <article class="card">
-                <div class="card-icon">⌘</div>
-                <div class="card-label">Deployment Environment</div>
-                <div class="card-value">{{ app_environment }}</div>
-                <div class="card-footer">ENVIRONMENT CONFIGURATION</div>
-            </article>
-
-            <article class="card">
-                <div class="card-icon">⚙</div>
-                <div class="card-label">Configuration Management</div>
-                <div class="card-value">Ansible</div>
-                <div class="card-footer">ORCHESTRATED BY SEMAPHORE</div>
-            </article>
-        </section>
-
-        <section class="pipeline">
-            <h2>Deployment Workflow</h2>
-
-            <div class="steps">
-                <div class="step">
-                    <div class="step-number">01</div>
-                    <div>
-                        <div class="step-name">Source Configuration</div>
-                        <div class="step-detail">Ansible repository</div>
-                    </div>
+        <!-- Hero -->
+        <section class="hero">
+            <div class="container">
+                <div class="eyebrow">
+                    <span class="dot"></span>
+                    Infrastructure as Code · Automated Deployment
                 </div>
 
-                <div class="step">
-                    <div class="step-number">02</div>
-                    <div>
-                        <div class="step-name">Automation</div>
-                        <div class="step-detail">Semaphore task execution</div>
-                    </div>
-                </div>
+                <h1>
+                    Deploy smarter.<br>
+                    Operate with <span class="gradient">confidence.</span>
+                </h1>
 
-                <div class="step">
-                    <div class="step-number">03</div>
-                    <div>
-                        <div class="step-name">Web Application</div>
-                        <div class="step-detail">Managed server deployment</div>
-                    </div>
+                <p class="hero-description">
+                    {{ app_message }}
+                    This web application is deployed on an AWS EC2 target instance,
+                    configured through Ansible and orchestrated with Semaphore,
+                    with Nginx serving the application.
+                </p>
+
+                <div class="hero-tags">
+                    <span class="tag">AWS EC2</span>
+                    <span class="tag">Ansible</span>
+                    <span class="tag">Semaphore</span>
+                    <span class="tag">Nginx</span>
+                    <span class="tag">Infrastructure as Code</span>
                 </div>
             </div>
         </section>
 
-        <footer>
-            <div>
-                <strong>{{ app_name }}</strong><br>
-                Automated Infrastructure Management
-            </div>
+        <!-- Infrastructure Overview -->
+        <section class="section">
+            <div class="container">
+                <div class="section-heading">
+                    <h2>Infrastructure Overview</h2>
+                    <p>Application configuration and deployment components</p>
+                </div>
 
-            <div>
-                Managed by Ansible through Semaphore<br>
-                © 2026 · Internal Application Portal
+                <div class="grid">
+                    <article class="card">
+                        <div class="card-icon">☁</div>
+                        <div class="card-label">Cloud Provider</div>
+                        <div class="card-value">Amazon Web Services</div>
+                        <div class="card-detail">EC2 compute infrastructure</div>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-icon">⚙</div>
+                        <div class="card-label">Automation Engine</div>
+                        <div class="card-value">Ansible</div>
+                        <div class="card-detail">Repeatable server configuration</div>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-icon">⇄</div>
+                        <div class="card-label">Task Orchestration</div>
+                        <div class="card-value">Semaphore</div>
+                        <div class="card-detail">Playbook execution and task logs</div>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-icon">◉</div>
+                        <div class="card-label">Web Server</div>
+                        <div class="card-value">Nginx</div>
+                        <div class="card-detail">HTTP request handling and static content</div>
+                    </article>
+                </div>
             </div>
-        </footer>
+        </section>
+
+        <!-- Architecture -->
+        <section class="section">
+            <div class="container">
+                <div class="section-heading">
+                    <h2>Deployment Architecture</h2>
+                    <p>How configuration reaches the target EC2 instance</p>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <div>
+                            <h3>Automated Configuration Pipeline</h3>
+                            <p>Controller → Configuration management → Target server</p>
+                        </div>
+                        <span class="panel-badge">3 COMPONENTS</span>
+                    </div>
+
+                    <div class="architecture">
+                        <div class="node semaphore">
+                            <div class="node-icon">◈</div>
+                            <div class="node-title">Semaphore</div>
+                            <div class="node-subtitle">Launches the Ansible task</div>
+                        </div>
+
+                        <div class="arrow" aria-hidden="true">→</div>
+
+                        <div class="node ansible">
+                            <div class="node-icon">⚙</div>
+                            <div class="node-title">Ansible Controller</div>
+                            <div class="node-subtitle">SSH · Playbook · Idempotence</div>
+                        </div>
+
+                        <div class="arrow" aria-hidden="true">→</div>
+
+                        <div class="node nginx">
+                            <div class="node-icon">☁</div>
+                            <div class="node-title">AWS EC2 Target</div>
+                            <div class="node-subtitle">Nginx · HTML · HTTP</div>
+                        </div>
+                    </div>
+
+                    <div class="code-window">
+                        <div class="code-top">
+                            <span>deployment-flow.yml</span>
+                            <div class="code-dots">
+                                <span></span><span></span><span></span>
+                            </div>
+                        </div>
+                        <pre><span class="comment"># Example deployment workflow</span>
+<span class="keyword">1.</span> Semaphore launches the configured task
+<span class="keyword">2.</span> Ansible connects to the EC2 target using SSH
+<span class="keyword">3.</span> Ansible installs and configures Nginx
+<span class="keyword">4.</span> Ansible deploys the HTML template
+<span class="keyword">5.</span> Nginx serves the page over HTTP/HTTPS</pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Deployment Process -->
+        <section class="section">
+            <div class="container">
+                <div class="section-heading">
+                    <h2>Deployment Lifecycle</h2>
+                    <p>From source control to a web page served by Nginx</p>
+                </div>
+
+                <div class="workflow">
+                    <article class="workflow-step">
+                        <div class="step-number">01</div>
+                        <h3>Prepare Configuration</h3>
+                        <p>
+                            Store the inventory, playbooks, templates and
+                            variables in your Ansible project repository.
+                        </p>
+                    </article>
+
+                    <article class="workflow-step">
+                        <div class="step-number">02</div>
+                        <h3>Execute with Semaphore</h3>
+                        <p>
+                            Configure the repository, inventory, SSH key,
+                            environment and task template in Semaphore.
+                        </p>
+                    </article>
+
+                    <article class="workflow-step">
+                        <div class="step-number">03</div>
+                        <h3>Configure the EC2 Target</h3>
+                        <p>
+                            Ansible installs Nginx, publishes the HTML
+                            template and verifies the intended configuration.
+                        </p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- Application Details -->
+        <section class="section">
+            <div class="container">
+                <div class="section-heading">
+                    <h2>Application Details</h2>
+                    <p>Values rendered from your Ansible-managed template</p>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <div>
+                            <h3>{{ app_name }}</h3>
+                            <p>Deployment configuration</p>
+                        </div>
+                        <span class="panel-badge">TEMPLATE RENDERED</span>
+                    </div>
+
+                    <div class="code-window">
+                        <div class="code-top">
+                            <span>application-config</span>
+                            <span>JINJA2 VARIABLES</span>
+                        </div>
+                        <pre>application_name: <span class="value">{{ app_name }}</span>
+environment:      <span class="value">{{ app_environment }}</span>
+configuration:    <span class="value">Ansible</span>
+orchestration:    <span class="value">Semaphore</span>
+web_server:       <span class="value">Nginx</span>
+compute:          <span class="value">AWS EC2</span></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Technology Stack -->
+        <section class="section">
+            <div class="container">
+                <div class="section-heading">
+                    <h2>Technology Stack</h2>
+                    <p>Tools used to configure and serve this application</p>
+                </div>
+
+                <div class="tech-stack">
+                    <div class="tech"><span>✓</span> Amazon EC2</div>
+                    <div class="tech"><span>✓</span> Ansible Playbooks</div>
+                    <div class="tech"><span>✓</span> Semaphore UI</div>
+                    <div class="tech"><span>✓</span> Nginx</div>
+                    <div class="tech"><span>✓</span> SSH Authentication</div>
+                    <div class="tech"><span>✓</span> Jinja2 Templates</div>
+                    <div class="tech"><span>✓</span> YAML Configuration</div>
+                    <div class="tech"><span>✓</span> Infrastructure as Code</div>
+                </div>
+            </div>
+        </section>
+
     </main>
+
+    <footer class="footer">
+        <div class="container" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:15px;">
+            <div>
+                <strong>CloudOps</strong> · Automated Infrastructure Deployment
+            </div>
+            <div>
+                AWS EC2 &nbsp;·&nbsp; Ansible &nbsp;·&nbsp; Semaphore &nbsp;·&nbsp; Nginx
+            </div>
+        </div>
+    </footer>
+
 </body>
 </html>
