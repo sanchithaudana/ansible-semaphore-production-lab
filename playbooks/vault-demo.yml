@@ -1,0 +1,20 @@
+---
+- name: Test Ansible Vault through Semaphore
+  hosts: webservers
+  become: true
+  gather_facts: true
+
+  tasks:
+  - name: Verify encrypted variables were decrypted
+    ansible.builtin.assert:
+      that:
+      - vault_demo.database_password is defined
+      - vault_demo.api_token is defined
+      - vault_demo.database_password | length > 0
+      - vault_demo.api_token | length > 0
+      fail_msg: "Vault variables are missing or empty."
+    no_log: true
+
+  - name: Confirm Vault test completed
+    ansible.builtin.debug:
+      msg: "Vault variables decrypted successfully."
